@@ -1,0 +1,229 @@
+
+--drop table Date_Dim ;
+create table Date_Dim (
+date_key number(10) primary key ,
+Date_d date   ,
+year_y date ,
+month_m date ,
+day_d date 
+);
+
+--drop table time_dim ;
+create table time_dim (
+time_key number(10) primary key ,
+timestamp_t  timestamp --'YYYY-MM-DD HH24:MI:SS.FF' ,
+--hour_h timezone_hour ,
+--minutes timezone_minute,
+); 
+
+--drop table AirPort_Dim ;
+
+create table AirPort_Dim (
+airport_key   number(5) primary key,
+airport_name varchar2(100) ,
+country varchar2(30) , 
+city  varchar2(30) , 
+num_of_gates number(3) ,
+timezone number(10) );
+  
+  -- drop table Flight_Dim ;  
+
+ create table Flight_Dim (
+ flight_key number(10) primary key , 
+ departure_airport_key number(5) ,
+ arrival_airport_key number(5),
+ depature_time timestamp ,
+ arrival_time timestamp ,
+ acctual_dep_time timestamp ,
+ acctual_arr_time timestamp ,
+constraint dep_airport_fk FOREIGN KEY(departure_airport_key) references AirPort_Dim (airport_key) ,
+constraint destination_airport_fk FOREIGN KEY(arrival_airport_key) references AirPort_Dim (airport_key)) ; 
+ 
+  --drop table class_Dim ;
+
+  create table class_Dim (
+  class_key number(10) primary key , 
+  class_type varchar2(25),
+  description varchar2(100));
+  
+ 
+  
+ 
+
+ --drop table client_dim ; 
+
+  create table client_dim (
+  client_key number(10) primary key , 
+  passport_key varchar2(100) unique ,
+ client_name varchar2(100) ,
+ gender  varchar2(10),
+ dateOFbirth date ,
+ nationality  varchar2(50),
+ contact_num varchar2(20) ) ; 
+ 
+ 
+
+ 
+  --drop table channel_of_interaction ;
+
+  create table channel_of_interaction (
+  channel_key number(10) primary key , 
+ channel_type varchar2(50) );
+ 
+
+  --drop table agent_dim ; 
+
+  create table agent_dim (
+  agent_key number(5) primary key ,
+  NID varchar2(20),
+  agent_name varchar2(50),
+  dateOFbirht date ,
+  nationality varchar2(50),
+  contact_num varchar2(25),
+  title varchar2(25)
+  );
+  
+ --drop table interaction_type ;
+  create table interaction_type (
+  interaction_type_key number(10) primary key , 
+ Inter_type varchar2(50) ,
+ severity varchar2 (20));
+ 
+ --drop table case_state_dim ;
+
+ create table case_state_dim(
+ case_state_key number(10) primary key,
+ state varchar2(50),
+ priority number(4)
+ );
+ 
+  --drop table ratings_fact ;
+  
+  create table ratings_fact (
+  issue_ticket_key number(10) primary key, 
+  date_key number(10),  
+  client_ID_key number(10),
+  flight_ID_key number(10),
+  class_ID_key number(10),
+  channel_key number(10) ,
+  flight_rating number(2),
+  service_rating number(2),
+  overall_rating number(2),
+ 
+ constraint date_fk FOREIGN KEY (date_key) references Date_Dim(date_key)  on delete cascade ,
+constraint  client_ID_fk FOREIGN KEY(client_ID_key) references client_dim (client_key)  on delete cascade ,
+ constraint flight_ID_fk FOREIGN KEY(flight_ID_key) references Flight_Dim (flight_key)  on delete cascade,
+ constraint  class_ID_Fk FOREIGN KEY(class_ID_key) references class_Dim (class_key)  on delete cascade ,
+ constraint channel_fk FOREIGN KEY(channel_key) references channel_of_interaction (channel_key) on delete cascade) ; 
+ 
+ 
+--drop table complaints_Inquires_fact ; 
+
+create table complaints_Inquires_fact ( 
+ issue_ticket_key number(10) primary key, 
+ date_key number (10),
+  time_key number(10),
+ client_key number(10),
+ agent_key number(5) ,
+ flight_key number(10),
+ class_key number(10),
+ channel_key number(10) ,
+ interaction_type_key number(10),
+ case_state_key number(10),
+overall_feedback number(2),
+
+constraint datee_fk FOREIGN KEY (date_key) references Date_Dim(date_key)  on delete cascade ,
+ constraint timee_fk FOREIGN KEY (time_key) references time_dim(time_key)  on delete cascade ,
+constraint Cli_id_fk FOREIGN KEY (client_key) references client_dim(client_key)  on delete cascade ,
+constraint agent_id_fk FOREIGN KEY (agent_key) references agent_dim(agent_key)  on delete cascade ,
+constraint flightt_id_fk FOREIGN KEY (flight_key) references Flight_Dim(flight_key) on delete cascade,
+constraint classs_id_fk FOREIGN KEY (class_key) references class_Dim(class_key)on delete cascade ,
+constraint  channel_Type_fk FOREIGN KEY (channel_key) references channel_of_interaction(channel_key) on delete cascade ,
+constraint inter_Type_fk FOREIGN KEY (interaction_type_key) references interaction_type(interaction_type_key) on delete cascade ,
+constraint case_state_fk FOREIGN KEY (case_state_key) references case_state_dim (case_state_key) on delete cascade);
+ 
+ /*alter table complaints_Inquires_fact add (
+ constraint date_fk FOREIGN KEY (date_key) references Date_Dim(date_key)  on delete cascade ,
+ constraint time_fk FOREIGN KEY (time_key) references time_dim(time_key)  on delete cascade ,
+constraint Cl_id_fk FOREIGN KEY (client_key) references client_dim(client_key)  on delete cascade ,
+constraint flight_id_fk FOREIGN KEY (flight_key) references Flight_Dim(flight_key) on delete cascade,
+constraint class_id_fk FOREIGN KEY (class_key) references class_Dim(class_key)on delete cascade ,
+constraint  channelType_fk FOREIGN KEY (channel_key) references channel_of_interaction(channel_of_interaction.channel_key) on delete cascade ,
+constraint interType_fk FOREIGN KEY (interaction_type_key) references interaction_type(interaction_type_key) on delete cascade ,
+constraint case_state_fk FOREIGN KEY (case_state_key) references case_state_dim (case_state_key) on delete cascade ,
+ );*/
+ 
+                                                                 -----------------CREATING SEQUENCES-------------------------
+ -----airport_sequence-----\
+--drop sequence     airport_id_seq ;                                                      
+ create sequence airport_id_seq 
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  -----flight_sequence-----
+ create sequence flight_id_seq 
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  create sequence depature_airport_seq 
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  create sequence arrival_airport_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  -----------------channel of interaction ---------------
+  create sequence chtype_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  ------------interactionType------------
+  create sequence inter_type_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  --------------case State ----------
+  create sequence case_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  --------------client Dim----------
+  create sequence client_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+  ------------Class Dim------------
+  create sequence calss_seq  
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE ; 
+  
+                                                                          --------------------Creating INDEXES------------------
+                                                                          
+   -------------- index_airport_dim    ------------------                                                                
+ 
+ 
+ create index country_index 
+ on AirPort_Dim(countyr);
+ 
+ create index city_index 
+ on AirPort_Dim(city);
+

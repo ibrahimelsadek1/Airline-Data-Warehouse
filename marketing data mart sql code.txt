@@ -1,0 +1,324 @@
+Marketing schema
+--------------------------
+
+
+-----------------------------------------------------------------------------------------------
+create table airport_dim
+(
+	airport_id         number(5)   CONSTRAINT PK_airportID PRIMARY KEY,
+	airport_name        varchar2(25),
+	airport_country     varchar2(25),
+	airport_city	    varchar2(25),
+	airport_timezone    number(5)
+	
+)
+
+
+CREATE TABLE Flight_dim
+	(
+	
+ 	flight_id                              number(5)  CONSTRAINT PK_FLIGHT PRIMARY KEY,
+  	departure_airport_key                  number(5),
+  	arrival_airport_key                    number(5),
+  	departure_time                         number(5),
+  	arrival_time                           number(5),
+  	actual_dep_time                        number(5),
+  	actual_arr_time                        number(5),
+  	departure_date                         DATE,
+  	arrival_date                           DATE, 
+  	actual_departure_date                  DATE,
+  	actual_arrival_date                    DATE
+  	);
+
+alter table Flight_dim
+add
+(	constraint FK_airport_dept_key  foreign key  (departure_airport_key)  references  airport_dim(airport_id)           on delete cascade ,
+	constraint FH_airport_arr_key   foreign key  (arrival_airport_key)    references  airport_dim(airport_id)           on delete cascade 
+)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+create table tiers_dim
+(
+	tier_id                            number(5) CONSTRAINT PK_tierID PRIMARY KEY,
+	tier_type                          varchar2(25),
+	mile_perc	                   number(5),
+	upgrade_mile_perc                  number(5),
+	additional_buggage_allowance       number(3),
+	discount_on_additional_buggage     number(5)
+
+)
+					---------------------------------------------------------
+					---------------------------------------------------------
+
+
+
+create table frequent_flyer_dim
+(
+	frequent_flayer_id                    number(5)     CONSTRAINT PK_freq_flayerID PRIMARY KEY,
+	current_tier_id	                      number(5) ,
+	current_miles-number                  number(5),
+	current_qualification_dollars_amount  number(5),
+	start_date                            DATE,
+	end_date                              DATE
+
+)
+
+alter table frequent_flyer_dim
+add 
+constraint FK_tier_id  foreign key  (current_tier_id)  references  tiers_dim(tier_id)    on delete cascade
+
+
+					---------------------------------------------------------
+					---------------------------------------------------------
+
+
+
+create table client_dim
+ (
+    client_id                number(5)CONSTRAINT PK_passenger PRIMARY KEY,
+    passport_id              number(8),
+    F_name                   varchar2(15),
+    gender                   varchar(8),
+    age                      number(2),
+    nationality              varchar2(10) ,
+    contact_num              number(12)
+)
+
+					---------------------------------------------------------
+					---------------------------------------------------------
+
+
+
+
+
+create table client_mapped_dim
+(
+	client_mapped_id   number(5) CONSTRAINT PK_mappedID PRIMARY KEY,
+        frequent_flyer_id  number(5),
+	client_id          number(5)	   
+)
+
+alter table client_mapped_dim
+add
+(
+constraint FK_frequentFlyer  foreign key  (frequent_flyer_id) references  frequent_flyer_dim(frequent_flyer_id) on delete cascade ,
+constraint FK_client_id      foreign key  (client_id)         references  client_dim(client_id) on delete cascade
+	
+)
+
+					---------------------------------------------------------
+					---------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+create table class_dim
+(
+    class_id      number(5) CONSTRAINT PK_classID PRIMARY KEY,
+    type          varchar2(15),
+    description   varchar(100)
+)
+---------------------------------------------------------------------------------------
+create table payment_method_dim
+ (		
+	method_key          number(4) CONSTRAINT PK_IDPayMethod PRIMARY KEY,
+    	method_type         varchar2(100)
+  )
+----------------------------------------------------------------------------------------
+create table Booking_channel_dim
+ (
+    booking_id          number(2) CONSTRAINT PK_IDbooking PRIMARY KEY,
+    booking_type        varchar2(100)
+  )
+--------------------------------------------------------------------------------------
+create table fare_base_dim
+(
+	fare_base_id                 number(5)   CONSTRAINT PK_FarebaseID PRIMARY KEY,
+	type                         varchar2(15),
+	base_mile                    number(5),
+	class_bouns                  number(5),
+	total_mile_earned_perc       number(5),
+	qualification_dollars_perc   number(5)
+
+)
+--------------------------------------------------------------------------------------------
+create table date_dim
+(
+
+	date_key  DATE   CONSTRAINT PK_dateID PRIMARY KEY,
+	date      DATE,
+	year	  DATE,
+	month     DATE,
+	day       DATE,
+
+)
+
+-------------------------------------------------------------------------------------------------
+create  table time_dim
+(
+	time_key   (----datatype----) CONSTRAINT PK_timeID PRIMARY KEY,
+	timestamp  (----datatype----) ,
+	hour       (----datatype----) ,
+	minute     (----datatype----) ,
+	second     (----datatype----)
+
+)
+
+create table client_flight_facts
+(
+
+   issue_ticket_id                     number(50),
+   date_key                            DATE,
+   client_mapped_key                   number(5),
+   flight_key                          number(5),
+   class_key                           number(5),
+   payment_method_key                  number(5),
+   fare_base_key                       number(5),
+   time_key                            numner(5),
+   booking_channel_key                 number(2),
+   --------------------------------
+   fare_price                          number(5),
+   additional_luggage_fees             number(5), 
+   upgrade_fees                        number(5),
+   redeemed_miles                      number(5),
+   redeemed_dollars                    number(5),
+   miles_earned                        number(5),
+   qualification_dollars_earned        number(5)
+)
+
+alter table client_flight_facts 
+add
+(
+ constraint FK_date       foreign key  (date_key)              references  date_dim(date_key)                        on delete cascade ,
+ constraint FK_mapped     foreign key  (client_mapped_key)     references  client_mapped_dim(client_mapped_id)       on delete cascade ,
+ constraint FK_flight     foreign key  (flight_key)            references  Flight_dim(flight_id)                     on delete cascade ,
+ constraint FK_class      foreign key  (class_key)             references  class_dim(class_id)                       on delete cascade ,
+ constraint FK_paymet     foreign key  (payment_method_key)    references  payment_method_dim(method_key)            on delete cascade ,
+ constraint FK_fare       foreign key  (fare_base_key)         references  fare_base_dim(fare_base_id)               on delete cascade ,
+ constraint FK_time       foreign key  (time_key)              references  time_dim(time_key)                        on delete cascade ,
+ constraint FK_booking    foreign key  (booking_channel_key)   references  Booking_channel_dim(booking_id)           on delete cascade ,
+)
+-------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+creating sequences
+--------------------
+
+
+
+
+create sequence airport_seq
+		increment by 7 
+		start with 400
+		maxvalue   800
+		nocycle;
+
+
+create sequence FLIGHT_KEY_seq
+		increment by 7 
+		start with 1000
+		maxvalue   2000
+		nocycle;
+
+
+
+create sequence tiers_seq
+		increment by 1 
+		start with 50
+		maxvalue   200
+		nocycle;
+
+
+create sequence frequent_flyer_seq
+		increment by 300 
+		start with 4
+		maxvalue   1000
+		nocycle;
+
+
+
+create sequence client_seq
+		increment by 3
+		start with 5000
+		maxvalue   6000
+		nocycle;
+
+
+create sequence client_mapped_seq
+		increment by 5 
+		start with 20
+		maxvalue   2000
+		nocycle;
+
+
+
+
+create sequence class_seq
+		increment by 1 
+		start with 1
+		maxvalue   3
+		nocycle;
+
+
+
+create sequence bayment_method_seq
+		increment by 2 
+		start with 11
+		maxvalue   15
+		nocycle;
+
+
+
+create sequence Booking_key_seq
+		increment by 1 
+		start with 1
+		maxvalue   5
+		nocycle;
+
+
+create sequence fare_base_seq
+		increment by 90 
+		start with 2
+		maxvalue   105
+		nocycle;
+
+------------------------------------------------------------------------------------------------------------
+
+
+creating_index
+-------------------------
+
+create index index_airport_dim
+ON airport_dim (airport_id , airport_name);
+
+
+create index index_flight_dim
+ON Flight_dim (flight_id);
+
+create index index_tiers_dim
+ON Flight_dim (tier_id , tier_type);
+
+
+create index_frequent_flyer_dim
+on frequent_flyer_dim (frequent_flayer_id);
+
+create index_client_dim
+on client_dim (client_id  , passport_id);
+
+
+create index_payment_method_dim
+on payment_method_dim(method_type);
+
+
+create index_fare_base_dim
+ on fare_base_dim(fare_base_id);
+
+
+
+
+

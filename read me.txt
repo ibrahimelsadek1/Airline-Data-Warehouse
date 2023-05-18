@@ -1,0 +1,18 @@
+this is team 8 project
+
+
+team members : 
+- Yousra Mohamed
+- Abdelaziz amin
+- Ibrahim elsayed
+
+
+attached files 
+- modeling report which include(entire design process and diagrams)
+- physical model in excel file 
+- sql code for 4 data marts 
+- queries file 
+- report about indexes types 
+
+
+
